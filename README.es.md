@@ -29,6 +29,7 @@ Las inmobiliarias publican; los visitantes buscan en el mapa, agendan visitas y 
 
 - [Qué hace](#qué-hace)
 - [Capturas](#capturas)
+- [El proyecto en números](#el-proyecto-en-números)
 - [Arquitectura](#arquitectura)
 - [Tecnologías](#tecnologías)
 - [Desafíos técnicos resueltos](#desafíos-técnicos-resueltos)
@@ -62,6 +63,11 @@ de referencia al dólar MEP del día.
   </tr>
 </table>
 
+<p align="center">
+  <img src="assets/gifs/agency-dashboard.gif" alt="Panel de la inmobiliaria: estadísticas, propiedades del equipo y formulario para publicar" width="800"><br>
+  <sub><b>Panel de la inmobiliaria.</b> Estadísticas, propiedades del equipo con su estado, exportación CSV, confirmación de disponibilidad en lote, importación y formulario para publicar.</sub>
+</p>
+
 <table>
   <tr>
     <td align="center"><img src="assets/gifs/mobile-tour.gif" alt="Recorrido en celular" width="260"></td>
@@ -70,6 +76,19 @@ de referencia al dólar MEP del día.
   </tr>
   <tr><td colspan="3" align="center"><sub><b>Celular.</b> La misma app, con la lista primero y un botón flotante "Ver mapa"; probada con el perfil de un Pixel 7.</sub></td></tr>
 </table>
+
+## El proyecto en números
+
+<sub>Foto de la rama `main` del repositorio privado al 16 de octubre de 2026.</sub>
+
+| | |
+| --- | --- |
+| **Desarrollo** | Desde el 10 de junio de 2026 · **207 commits** · **70 pull requests mergeados** |
+| **Versiones** | **35 versiones con tag**, de `v0.1.0` a `v0.8.17`, cada una verificada en producción |
+| **Código de la app** | **~20.500 líneas** de TypeScript/TSX · 24 páginas · 64 componentes · 20 módulos de server actions · 15 rutas de API |
+| **Base de datos** | **67 migraciones**, ~7.800 líneas de SQL/PL·pgSQL (+ ~800 de scripts de reversión) |
+| **Pruebas** | **~9.100 líneas** de código de prueba · 875 verificaciones de base · 369 de datos · 96 pruebas de navegador |
+| **Total** | **~38.800 líneas** de código, sin contar documentación ni lockfiles |
 
 ## Arquitectura
 

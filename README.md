@@ -28,6 +28,7 @@ Agencies publish listings; visitors search on a map, book viewings and make offe
 
 - [What it does](#what-it-does)
 - [Screenshots](#screenshots)
+- [The project in numbers](#the-project-in-numbers)
 - [Architecture](#architecture)
 - [Tech stack](#tech-stack)
 - [Technical challenges solved](#technical-challenges-solved)
@@ -61,6 +62,11 @@ conversion at the day's MEP dollar rate, as is usual in Argentina.
   </tr>
 </table>
 
+<p align="center">
+  <img src="assets/gifs/agency-dashboard.gif" alt="Agency dashboard: stats, the team's listings, and the publish form" width="800"><br>
+  <sub><b>Agency dashboard.</b> Stats, the team's listings with status controls, CSV export, bulk availability confirmation, import, and the publish form.</sub>
+</p>
+
 <table>
   <tr>
     <td align="center"><img src="assets/gifs/mobile-tour.gif" alt="Mobile tour" width="260"></td>
@@ -69,6 +75,19 @@ conversion at the day's MEP dollar rate, as is usual in Argentina.
   </tr>
   <tr><td colspan="3" align="center"><sub><b>Mobile.</b> Same app, list-first with a floating "map" button; tested on a Pixel 7 profile.</sub></td></tr>
 </table>
+
+## The project in numbers
+
+<sub>Snapshot of the private repository's `main` branch as of October 16, 2026.</sub>
+
+| | |
+| --- | --- |
+| **Development** | Since June 10, 2026 · **207 commits** · **70 merged pull requests** |
+| **Releases** | **35 tagged versions**, `v0.1.0` → `v0.8.17`, each verified in production |
+| **Application code** | **~20,500 lines** of TypeScript/TSX · 24 pages · 64 components · 20 server-action modules · 15 API routes |
+| **Database** | **67 migrations**, ~7,800 lines of SQL/PL·pgSQL (+ ~800 lines of reversal scripts) |
+| **Tests** | **~9,100 lines** of test code · 875 database checks · 369 data checks · 96 browser tests |
+| **Total** | **~38,800 lines** of code, excluding docs and lockfiles |
 
 ## Architecture
 
