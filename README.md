@@ -3,7 +3,8 @@
 # Rock&Prop
 
 **A map-first real-estate platform, built for Argentina first and Latin America next.**
-Agencies publish listings; visitors search on a map, book viewings and make offers.
+Agencies publish listings; visitors search on a map, book viewings and make offers.<br>
+Built around how the Argentine market really works, with features no other portal in the market offers.
 
 [English](README.md) · [Español](README.es.md)
 

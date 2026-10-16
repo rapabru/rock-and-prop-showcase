@@ -3,7 +3,8 @@
 # Rock&Prop
 
 **Una plataforma inmobiliaria con el mapa como protagonista, pensada primero para Argentina y después para Latinoamérica.**
-Las inmobiliarias publican; los visitantes buscan en el mapa, agendan visitas y hacen ofertas.
+Las inmobiliarias publican; los visitantes buscan en el mapa, agendan visitas y hacen ofertas.<br>
+Pensada para cómo funciona de verdad el mercado argentino, con funciones únicas que ningún otro portal del mercado ofrece.
 
 [English](README.md) · [Español](README.es.md)
 
