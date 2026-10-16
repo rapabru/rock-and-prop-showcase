@@ -2,7 +2,7 @@
 
 # Rock&Prop
 
-**Un portal inmobiliario con el mapa como protagonista, para La Plata (Argentina).**
+**Una plataforma inmobiliaria con el mapa como protagonista, pensada primero para Argentina y después para Latinoamérica.**
 Las inmobiliarias publican; los visitantes buscan en el mapa, agendan visitas y hacen ofertas.
 
 [English](README.md) · [Español](README.es.md)

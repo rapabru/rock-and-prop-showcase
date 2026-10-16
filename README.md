@@ -2,7 +2,7 @@
 
 # Rock&Prop
 
-**A map-first real-estate marketplace for La Plata, Argentina.**
+**A map-first real-estate platform, built for Argentina first and Latin America next.**
 Agencies publish listings; visitors search on a map, book viewings and make offers.
 
 [English](README.md) · [Español](README.es.md)
