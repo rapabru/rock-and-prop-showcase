@@ -80,16 +80,16 @@ de referencia al dólar MEP del día.
 
 ## El proyecto en números
 
-<sub>Foto de la rama `main` del repositorio privado al 16 de octubre de 2026.</sub>
+<sub>Foto de la rama `main` del repositorio privado al 19 de octubre de 2026.</sub>
 
 | | |
 | --- | --- |
-| **Desarrollo** | Desde el 10 de junio de 2026 · **207 commits** · **70 pull requests mergeados** |
-| **Versiones** | **35 versiones con tag**, de `v0.1.0` a `v0.8.17`, cada una verificada en producción |
-| **Código de la app** | **~20.500 líneas** de TypeScript/TSX · 24 páginas · 64 componentes · 20 módulos de server actions · 15 rutas de API |
-| **Base de datos** | **67 migraciones**, ~7.800 líneas de SQL/PL·pgSQL (+ ~800 de scripts de reversión) |
-| **Pruebas** | **~9.100 líneas** de código de prueba · 875 verificaciones de base · 369 de datos · 96 pruebas de navegador |
-| **Total** | **~38.800 líneas** de código, sin contar documentación ni lockfiles |
+| **Desarrollo** | Desde el 10 de junio de 2026 · **231 commits** · **90 pull requests mergeados** |
+| **Versiones** | **48 versiones con tag**, de `v0.1.0` a `v0.8.30`, cada una verificada en producción |
+| **Código de la app** | **~22.000 líneas** de TypeScript/TSX · 28 páginas · 68 componentes · 21 módulos de server actions · 15 rutas de API |
+| **Base de datos** | **78 migraciones**, ~8.900 líneas de SQL/PL·pgSQL escritas a mano (+ ~1.100 de scripts de reversión), y ~8.600 filas de datos geográficos generados |
+| **Pruebas** | **~9.900 líneas** de código de prueba · 990 verificaciones de base · 408 de datos · 108 pruebas de navegador |
+| **Total** | **~43.200 líneas** de código, sin contar documentación, lockfiles ni datos generados |
 
 ## Arquitectura
 
@@ -139,9 +139,11 @@ flowchart LR
   dato; esas tablas no tienen políticas de `UPDATE`.
 - **La clave de servicio la usan solo dos cosas:** los webhooks firmados y las
   tareas programadas. Nunca un pedido que el usuario pueda armar.
-- **Cada cambio de esquema es una migración numerada** (67 hasta ahora, con
-  scripts de reversión para las riesgosas), aplicada primero en staging y
-  verificada en producción comparando el hash del cuerpo de cada función.
+- **Cada cambio de esquema es una migración numerada** (78 hasta ahora, con
+  scripts de reversión para las riesgosas), aplicada por un script que la
+  registra en la misma transacción: primero en staging, después en
+  producción, y las dos comparadas con una huella de cada función, permiso,
+  política, trigger y tabla de referencia.
 - **Server Components por defecto;** al navegador solo viajan el mapa y lo
   interactivo.
 
@@ -153,7 +155,8 @@ flowchart LR
 | UI | **React 19**, **Tailwind CSS 4**, íconos lucide | Iteración rápida y diseño consistente |
 | Lenguaje | **TypeScript** (estricto) y **SQL / PL/pgSQL** | Tipos de punta a punta; reglas de negocio en la base |
 | Base y autenticación | **Supabase**: Postgres, Auth (email + Google), Storage | Postgres administrado con RLS nativo |
-| Mapas | **Leaflet** + react-leaflet, mosaicos de OpenStreetMap | Gratis y sin clave de API en el cliente |
+| Mapas | **Leaflet** + react-leaflet, mosaicos vectoriales de **OpenFreeMap** (MapLibre GL, datos de OpenStreetMap) | Gratis, sin clave de API y con uso comercial permitido |
+| Geografía | Georef AR e INDEC (CC BY 4.0), mapas de barrios de las ciudades, contornos de OpenStreetMap (ODbL) | Cada pin cae en su localidad, en todo el país |
 | Estado | **zustand** | Mapa y lista sincronizados sin pasar props |
 | Imágenes | **sharp** (servidor) + canvas (navegador) | Maestros WebP normalizados, sin EXIF ni GPS |
 | Notificaciones | **Web Push** (VAPID) + email transaccional | Alertas con horario de silencio y tope diario |
@@ -290,6 +293,24 @@ Otra suite prueba las mismas reglas con JWTs reales contra un proyecto de
 staging, y Playwright recorre la app completa en escritorio y celular.
 </details>
 
+<details>
+<summary><b>13. Cada pin cae en la localidad correcta, en todo el país</b></summary>
+
+El nomenclador oficial da las 3.923 localidades del país como puntos, sin
+contorno, y en un aglomerado el centro más cercano suele ser el de otra
+localidad. Un pin se resuelve por capas, en Postgres puro (primero las cajas,
+después el punto en polígono en SQL): el contorno propio de la localidad
+cuando lo tiene, desde los mapas de barrios de las ciudades (Buenos Aires,
+Rosario, Córdoba, Mar del Plata, Mendoza) y OpenStreetMap para 194
+localidades del Gran Buenos Aires y 37 distritos del Gran Mendoza; después el polígono censal que contiene
+el punto, y el centro más cercano dentro de él; por último, el centro más
+cercano a menos de 40 km. Cada fuente llega como una migración generada,
+simplificada a ~20 m, y se cita con su licencia. Una prueba recorre los
+3.923 centros y exige que cada uno caiga en su propia localidad, nombrando
+una por una las pocas que el contorno de una vecina absorbe a propósito; un
+cambio en la regla de superposición se simula antes sobre todos ellos.
+</details>
+
 Además: exportaciones CSV protegidas contra inyección de fórmulas, `?next=`
 sin redirecciones abiertas, comparación de secretos en tiempo constante para
 el cron, ajustes de diseño para que todos los paneles se alcancen desde el
@@ -301,15 +322,17 @@ Largest Contentful Paint más rápido.
 
 | Suite | Qué cubre | Tamaño |
 | --- | --- | --- |
-| **Base de datos (RLS)** | Todas las migraciones sobre Postgres embebido; quién puede leer y escribir qué, con cada rol | **875 verificaciones** |
-| **Datos** | Conversores, dinero, vigencia, geometría, filtros, importación, CSV, seguridad de URLs | **369 verificaciones** |
-| **De punta a punta** | Playwright en Chrome de escritorio y perfil Pixel 7, con revisión de accesibilidad (axe); cada cuenta de prueba se borra al terminar | **96 pruebas** en 31 archivos |
+| **Base de datos (RLS)** | Todas las migraciones sobre Postgres embebido; quién puede leer y escribir qué, con cada rol; el centro de cada localidad cae en ella | **990 verificaciones** |
+| **Datos** | Conversores, dinero, vigencia, geometría, filtros, importación, CSV, seguridad de URLs | **408 verificaciones** |
+| **De punta a punta** | Playwright en Chrome de escritorio y perfil Pixel 7, con revisión de accesibilidad (axe); cada cuenta de prueba se borra al terminar | **108 pruebas** en 33 archivos |
 | **En vivo** | JWTs reales contra un proyecto de staging | flujo completo |
 
-Flujo de trabajo: `main` protegida, rama → PR → CI en verde → merge con
-rebase. Los cambios de base van primero a staging y después a producción,
-verificados por hash. Cada versión verificada en producción lleva un tag
-anotado. Producción tiene backup nocturno y la restauración se prueba.
+Flujo de trabajo: `main` protegida, rama → CI en verde con la versión de
+Node de producción → PR → merge con rebase. Las migraciones van primero a
+staging y después a producción, y las dos bases se comparan ítem por ítem
+con una huella de solo lectura. Cada versión verificada en producción lleva
+un tag anotado. Producción tiene backup nocturno y la restauración se prueba
+todos los meses.
 
 ## Fragmentos de código
 

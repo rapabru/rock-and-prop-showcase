@@ -79,16 +79,16 @@ conversion at the day's MEP dollar rate, as is usual in Argentina.
 
 ## The project in numbers
 
-<sub>Snapshot of the private repository's `main` branch as of October 16, 2026.</sub>
+<sub>Snapshot of the private repository's `main` branch as of October 19, 2026.</sub>
 
 | | |
 | --- | --- |
-| **Development** | Since June 10, 2026 · **207 commits** · **70 merged pull requests** |
-| **Releases** | **35 tagged versions**, `v0.1.0` → `v0.8.17`, each verified in production |
-| **Application code** | **~20,500 lines** of TypeScript/TSX · 24 pages · 64 components · 20 server-action modules · 15 API routes |
-| **Database** | **67 migrations**, ~7,800 lines of SQL/PL·pgSQL (+ ~800 lines of reversal scripts) |
-| **Tests** | **~9,100 lines** of test code · 875 database checks · 369 data checks · 96 browser tests |
-| **Total** | **~38,800 lines** of code, excluding docs and lockfiles |
+| **Development** | Since June 10, 2026 · **231 commits** · **90 merged pull requests** |
+| **Releases** | **48 tagged versions**, `v0.1.0` → `v0.8.30`, each verified in production |
+| **Application code** | **~22,000 lines** of TypeScript/TSX · 28 pages · 68 components · 21 server-action modules · 15 API routes |
+| **Database** | **78 migrations**, ~8,900 lines of SQL/PL·pgSQL written by hand (+ ~1,100 lines of reversal scripts), and ~8,600 rows of generated geographic data |
+| **Tests** | **~9,900 lines** of test code · 990 database checks · 408 data checks · 108 browser tests |
+| **Total** | **~43,200 lines** of code, excluding docs, lockfiles and generated data |
 
 ## Architecture
 
@@ -138,9 +138,11 @@ flowchart LR
   `UPDATE` policies for those tables at all.
 - **The service-role key is used by exactly two things:** signed webhooks and
   scheduled jobs. Never by a request a user can shape.
-- **Every schema change is a numbered migration** (67 so far, with reversal
-  scripts for the risky ones), applied to staging first and verified in
-  production by comparing function bodies by hash.
+- **Every schema change is a numbered migration** (78 so far, with reversal
+  scripts for the risky ones), applied by a script that records each one in
+  the same transaction: staging first, then production, and the two compared
+  by a fingerprint of every function, grant, policy, trigger and reference
+  table.
 - **Server Components by default;** the client bundle carries the map and the
   interactive bits only.
 
@@ -152,7 +154,8 @@ flowchart LR
 | UI | **React 19**, **Tailwind CSS 4**, lucide icons | Fast iteration, consistent design tokens |
 | Language | **TypeScript** (strict) and **SQL / PL/pgSQL** | Types end to end; business rules in the database |
 | Database & auth | **Supabase**: Postgres, Auth (email + Google), Storage | RLS-native, managed Postgres |
-| Maps | **Leaflet** + react-leaflet, OpenStreetMap tiles | Free, no API key on the client |
+| Maps | **Leaflet** + react-leaflet, vector tiles from **OpenFreeMap** (MapLibre GL, OpenStreetMap data) | Free, no API key, commercial use allowed |
+| Geography | Georef AR and INDEC (CC BY 4.0), city barrio maps, OpenStreetMap outlines (ODbL) | Every pin resolves to its locality across the whole country |
 | State | **zustand** | Map ↔ list synchronisation without prop drilling |
 | Images | **sharp** (server) + canvas (browser) | Normalised WebP masters, EXIF/GPS stripped |
 | Notifications | **Web Push** (VAPID) + transactional email | Saved-search alerts with quiet hours and a daily cap |
@@ -281,6 +284,23 @@ suite proves the same rules with real JWTs against a deployed staging
 project, and Playwright drives the full app on desktop and mobile.
 </details>
 
+<details>
+<summary><b>13. Every pin lands in the right town, across the whole country</b></summary>
+
+Argentina's official gazetteer gives its 3,923 localities as points, with no
+outline, and in a metropolitan area the nearest centre is often the wrong
+town. A pin is resolved in layers, in plain Postgres (bounding boxes first,
+then point-in-polygon in SQL): the locality's own outline where there is
+one, from the cities' barrio maps (Buenos Aires, Rosario, Córdoba, Mar del
+Plata, Mendoza) and OpenStreetMap for 194 localities of Greater Buenos
+Aires and 37 districts of the Gran Mendoza; then the census polygon that holds the point, and the nearest centre
+within it; last, the nearest centre within 40 km. Each source arrives as a
+generated migration, simplified to ~20 m, and is credited with its licence.
+A test walks all 3,923 centres and requires each to land in its own
+locality, naming one by one the few that a neighbour's outline absorbs on
+purpose; a change to the overlap rule is simulated over all of them first.
+</details>
+
 Also: CSV formula-injection guard on exports, open-redirect-safe `?next=`,
 constant-time secret comparison for cron routes, mobile-first layout fixes
 so every panel is reachable on a phone, and the first on-screen photo
@@ -291,15 +311,16 @@ fetched with high priority for a faster Largest Contentful Paint.
 
 | Suite | What it covers | Size |
 | --- | --- | --- |
-| **Database (RLS)** | All migrations on embedded Postgres; who can read/write what, as each role | **875 checks** |
-| **Data** | Mappers, money, freshness, geometry, filters, import parsing, CSV, URL safety | **369 checks** |
-| **End-to-end** | Playwright on desktop Chrome and a Pixel 7 profile, with axe accessibility scans; every test account cleans up after itself | **96 tests** in 31 spec files |
+| **Database (RLS)** | All migrations on embedded Postgres; who can read/write what, as each role; every locality's centre lands in it | **990 checks** |
+| **Data** | Mappers, money, freshness, geometry, filters, import parsing, CSV, URL safety | **408 checks** |
+| **End-to-end** | Playwright on desktop Chrome and a Pixel 7 profile, with axe accessibility scans; every test account cleans up after itself | **108 tests** in 33 spec files |
 | **Live** | Real JWTs against a deployed staging project | full user flow |
 
-Workflow: protected `main`, branch → PR → green CI → rebase merge. Database
-changes go to staging first, then production, verified by function-body hash.
-Every release verified in production gets an annotated tag. Production is
-backed up nightly and restores are tested.
+Workflow: protected `main`, branch → green CI on the Node version production
+runs → PR → rebase merge. Migrations go to staging first, then production,
+and the two are compared item by item by a read-only fingerprint. Every
+release verified in production gets an annotated tag. Production is backed
+up nightly and the restore is tested every month.
 
 ## Code snippets
 
